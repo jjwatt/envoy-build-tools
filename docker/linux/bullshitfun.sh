@@ -143,7 +143,9 @@ install_ppc64le_bazel () {
     chmod +x /usr/local/bin/bazel
 }
 
-fromtoplevel() {   
+# From ubuntu/fun.sh starts here.
+
+ubuntu_toplevel() {   
     if ! command -v lsb_release &> /dev/null; then
 	apt-get -qq update -y
 	apt-get -qq install -y --no-install-recommends locales
@@ -153,74 +155,74 @@ fromtoplevel() {
     fi
 }
 
-# From centos/fun.sh starts here.
-LSB_RELEASE="$(lsb_release -cs)"
-APT_KEYS_ENV=(
-    "${APT_KEY_TOOLCHAIN}")
-APT_REPOS_LLVM=(
-    "https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main")
-APT_KEYS_MOBILE=(
-    "$APT_KEY_AZUL")
-APT_REPOS_ENV=(
-    "http://ppa.launchpad.net/ubuntu-toolchain-r/test/ubuntu  ${LSB_RELEASE} main")
-APT_REPOS=(
-    "[arch=${DEB_ARCH}] https://download.docker.com/linux/ubuntu ${LSB_RELEASE} stable"
-    "http://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_20.04/ /")
-COMMON_PACKAGES=(
-    apt-transport-https
-    ca-certificates
-    g++
-    git
-    gnupg2
-    gpg-agent
-    unzip
-    wget
-    xz-utils)
-CI_PACKAGES=(
-    aspell
-    aspell-en
-    jq
-    libcap2-bin
-    make
-    patch
-    tcpdump
-    time
-    sudo)
-LLVM_PACKAGES=(
-    cmake
-    cmake-data
-    ninja-build
-    python3)
-UBUNTU_PACKAGES=(
-    automake
-    bc
-    byobu
-    bzip2
-    curl
-    devscripts
-    docker-buildx-plugin
-    docker-ce-cli
-    doxygen
-    expect
-    gdb
-    graphviz
-    libffi-dev
-    libncurses-dev
-    libssl-dev
-    libtool
-    make
-    rpm
-    rsync
-    skopeo
-    ssh-client
-    strace
-    tshark
-    zip)
-
-
-if [[ "$ARCH" == "aarch64" ]]; then
-    COMMON_PACKAGES+=(libtinfo5)
-fi
+# wrapping it
+ubuntu_env() {
+    LSB_RELEASE="$(lsb_release -cs)"
+    APT_KEYS_ENV=(
+	"${APT_KEY_TOOLCHAIN}")
+    APT_REPOS_LLVM=(
+	"https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main")
+    APT_KEYS_MOBILE=(
+	"$APT_KEY_AZUL")
+    APT_REPOS_ENV=(
+	"http://ppa.launchpad.net/ubuntu-toolchain-r/test/ubuntu  ${LSB_RELEASE} main")
+    APT_REPOS=(
+	"[arch=${DEB_ARCH}] https://download.docker.com/linux/ubuntu ${LSB_RELEASE} stable"
+	"http://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_20.04/ /")
+    COMMON_PACKAGES=(
+	apt-transport-https
+	ca-certificates
+	g++
+	git
+	gnupg2
+	gpg-agent
+	unzip
+	wget
+	xz-utils)
+    CI_PACKAGES=(
+	aspell
+	aspell-en
+	jq
+	libcap2-bin
+	make
+	patch
+	tcpdump
+	time
+	sudo)
+    LLVM_PACKAGES=(
+	cmake
+	cmake-data
+	ninja-build
+	python3)
+    UBUNTU_PACKAGES=(
+	automake
+	bc
+	byobu
+	bzip2
+	curl
+	devscripts
+	docker-buildx-plugin
+	docker-ce-cli
+	doxygen
+	expect
+	gdb
+	graphviz
+	libffi-dev
+	libncurses-dev
+	libssl-dev
+	libtool
+	make
+	rpm
+	rsync
+	skopeo
+	ssh-client
+	strace
+	tshark
+	zip)
+    if [[ "$ARCH" == "aarch64" ]]; then
+	COMMON_PACKAGES+=(libtinfo5)
+    fi    
+}
 
 
 # This is not currently used
@@ -344,9 +346,6 @@ install_llvm_ubuntu () {
     install_gn
 }
 
-YUM_LLVM_PKGS=(
-    cmake3
-    ninja-build)
 
 # NOTE(jjwatt): Hmm. I don't think it matters that this is defined twice.
 # I concatenated common_fun.sh and ubuntu/fun.sh and centos/fun.sh
@@ -361,34 +360,38 @@ YUM_LLVM_PKGS=(
 # And, then, they're redefined and new functions are defined after that. Those will have the
 # new values, which is exactly what you want, but maybe not what you're used to.
 
-# Note: rh-git218 is needed to run `git -C` in docs build process.
-# httpd24 is equired by rh-git218
-COMMON_PACKAGES=(
-    devtoolset-9-binutils
-    devtoolset-9-gcc
-    devtoolset-9-gcc-c++
-    devtoolset-9-libatomic-devel
-    glibc-static
-    libstdc++-static
-    rh-git218
-    wget)
-YUM_PKGS=(
-    autoconf
-    doxygen
-    graphviz
-    java-1.8.0-openjdk-headless
-    jq
-    libtool
-    make
-    openssl
-    patch
-    python27
-    rsync
-    sudo
-    tcpdump
-    unzip
-    which)
-
+centos_env() {
+    YUM_LLVM_PKGS=(
+	cmake3
+	ninja-build)
+    # Note: rh-git218 is needed to run `git -C` in docs build process.
+    # httpd24 is equired by rh-git218
+    COMMON_PACKAGES=(
+	devtoolset-9-binutils
+	devtoolset-9-gcc
+	devtoolset-9-gcc-c++
+	devtoolset-9-libatomic-devel
+	glibc-static
+	libstdc++-static
+	rh-git218
+	wget)
+    YUM_PKGS=(
+	autoconf
+	doxygen
+	graphviz
+	java-1.8.0-openjdk-headless
+	jq
+	libtool
+	make
+	openssl
+	patch
+	python27
+	rsync
+	sudo
+	tcpdump
+	unzip
+	which)
+}
 
 install_base_centos () {
     localedef -c -f UTF-8 -i en_US en_US.UTF-8
