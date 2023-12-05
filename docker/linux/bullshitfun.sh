@@ -153,6 +153,7 @@ fromtoplevel() {
     fi
 }
 
+# From centos/fun.sh starts here.
 LSB_RELEASE="$(lsb_release -cs)"
 APT_KEYS_ENV=(
     "${APT_KEY_TOOLCHAIN}")
@@ -346,6 +347,20 @@ install_llvm_ubuntu () {
 YUM_LLVM_PKGS=(
     cmake3
     ninja-build)
+
+# NOTE(jjwatt): Hmm. I don't think it matters that this is defined twice.
+# I concatenated common_fun.sh and ubuntu/fun.sh and centos/fun.sh
+# So far, I've renamed the few functions that were different &
+# I fenced some of what was at the toplevel in a function, "fromtoplevel()"
+# But, yeah. bash. dynamic scope. I think it's actually even OK to sort of
+# concatentate the two without renaming stuff as long as you are using it
+# from the right dynamic context. Like, Example:
+# If COMMON_PACKAGES is defined way at the top in the "ubuntu" version, but then
+# we concatenate the "centos" version onto the bottom, the COMMON_PACKAGES variable will be
+# "right" for all the top level functions up until they're re-defined!
+# And, then, they're redefined and new functions are defined after that. Those will have the
+# new values, which is exactly what you want, but maybe not what you're used to.
+
 # Note: rh-git218 is needed to run `git -C` in docs build process.
 # httpd24 is equired by rh-git218
 COMMON_PACKAGES=(
