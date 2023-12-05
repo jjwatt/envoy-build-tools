@@ -5,6 +5,19 @@
 # Then, centos/fun.sh was added on top to simplify everything.
 # Most function names don't even collide.
 # We can see how more limited the CentOS build is/was vs the ubuntu one.
+
+# Why?
+# I'm doing this to simplify the mess so that I can hack and play
+# with it. By combining, isolating and fencing this nonsense,
+# I can start playing with the build containers w/o starting from
+# scratch, and by using the real code, I'll know it's behaving the
+# same as what's on the CI.
+# So, from here, one could imagine updating the ubuntu build image
+# beyond focal, updating/fixing the CentOS image, adapting the
+# CentOS image to another RHEL-base or providing entirely new
+# distro build images.
+
+# Start originals
 set -o pipefail
 
 ARCH="$(uname -m)"
